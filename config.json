@@ -1,0 +1,21 @@
+{
+    "version" : "0.1 ALPHA",
+    "debug" : true,
+    "adminGuildId" : "836991410175344640",
+
+    "defaultColor" : "#FF69B4",
+    "adminColor" : "#fc0339",
+    "profColors" : {
+        "5" : "b42fef",
+        "4" : "b",
+        "3" : "c",
+        "2" : "d",
+        "1" : "e"
+    },
+
+    "rateProfReviewChannels" : [
+        "891099090488807464",
+        "1395230088005685268",
+        "1395238578451120239"
+    ]   
+}
