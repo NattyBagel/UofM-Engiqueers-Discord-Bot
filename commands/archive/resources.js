@@ -110,5 +110,11 @@ async function execute(interaction) {
 
 module.exports = {
 	data: data,
-	execute
+	execute,
+    help: {
+		guideText: 'Reloads Commands',
+		// Priority of Commands (0 is highest for users, -1 is for Admins)
+		// If Matched Priority, sort alphabetically
+		priority: -1
+	}
 };

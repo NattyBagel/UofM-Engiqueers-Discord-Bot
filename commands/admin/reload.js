@@ -14,15 +14,20 @@ async function reimportCommands(interaction){
     interaction.reply({ embeds: [Embed], flags: MessageFlags.Ephemeral })
 }
 
-async function reloadCommands(interaction){
+async function restart(interaction){
     // Not implemented yet
-    return
+    interaction.reply({ content: 'not implemented yet', flags: MessageFlags.Ephemeral })
+}
+
+async function reDownloadCommands(interaction){ 
+    // Not implemented yet
+    interaction.reply({ content: 'not implemented yet', flags: MessageFlags.Ephemeral })
 }
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('reload')
-		.setDescription('(BOT ADMIN) Reloads Commands')
+		.setDescription('(BOT ADMIN & DEV) Reloads Commands')
         .addStringOption(option =>
             option.setName('type')
                 .setDescription('What to Reload')
@@ -30,7 +35,8 @@ module.exports = {
                 .addChoices(
                     { name: 'All', value: '0' },
                     { name: 'Reimport Commands', value: '1' },
-                    { name: 'Reload Functions', value: '2' }
+                    { name: 'Restart Bot', value: '2' },
+                    { name: 'Download Files', value: '3'}
                 )
         ),
 	async execute(interaction) {
@@ -44,11 +50,20 @@ module.exports = {
                 reimportCommands(interaction)
                 break;
             case '2': // reload index.js
-                reloadCommands(interaction)
+                restart(interaction)
+                break;
+            case '3': // Redownload
+                reDownloadCommands(interaction)
                 break;
             default:
                 await interaction.reply({ content: "Error, Something went Wrong", flags: MessageFlags.Ephemeral })
                 break;
         }
 	},
+    help: {
+		guideText: 'Reloads key functions of the bot, such as the bot itself, commands and downloading from github',
+		// Priority of Commands (0 is highest for users, -1 is for Admins)
+		// If Matched Priority, sort alphabetically
+		priority: -1
+	}
 };
