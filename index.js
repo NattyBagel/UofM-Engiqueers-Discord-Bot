@@ -3,6 +3,7 @@ const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, MessageFlags, ActivityType} = require('discord.js');
 const { debug } = require('./config.json');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+//const { deployCommands } = require('./deploy-commands')
 
 
 
@@ -39,6 +40,7 @@ client.once(Events.ClientReady, c => {
 	
 	if (debug){
 		console.log(`Number of Commands Loaded: ${client.commands.size}`);
+		//deployCommands()
 	}
 });
 

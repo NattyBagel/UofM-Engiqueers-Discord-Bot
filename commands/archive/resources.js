@@ -112,9 +112,9 @@ module.exports = {
 	data: data,
 	execute,
     help: {
-		guideText: 'Reloads Commands',
+		guideText: 'Shows resources on a wide variety of topics.',
 		// Priority of Commands (0 is highest for users, -1 is for Admins)
 		// If Matched Priority, sort alphabetically
-		priority: -1
+		priority: 1
 	}
 };

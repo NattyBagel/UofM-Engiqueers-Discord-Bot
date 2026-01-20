@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, InteractionContextType, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const { deployCommands } = require("../../deploy-commands.js");
 const { adminColor } = require("../../config.json");
 
@@ -38,13 +38,16 @@ module.exports = {
                     { name: 'Restart Bot', value: '2' },
                     { name: 'Download Files', value: '3'}
                 )
-        ),
+        )		
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setContexts(InteractionContextType.Guild),
 	async execute(interaction) {
 
         switch (interaction.options.getString('type')) {
             case '0': // Reload Both Options
-                reimportCommands(interaction);
-                reloadCommands(interaction);
+                reimportCommands(interaction)
+                //restart(interaction)
+                //reDownloadCommands(interaction)
                 break;
             case '1': // Reimport Commands from deploy-commands.js
                 reimportCommands(interaction)
