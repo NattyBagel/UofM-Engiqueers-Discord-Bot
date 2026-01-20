@@ -30,7 +30,7 @@ function getPage(interaction,currPageNumber){
     let Embed = new EmbedBuilder()
     .setColor(defaultColor)
     .setTitle(`UMEQ Command Help Guide (Page ${currPageNumber}/${maxPages})`)
-    .setDescription(`Need Help with Commands? Here's some information! (Bot v${version})`)
+    .setDescription(`Need Help with Commands? Here's some information! [(Bot v${version})](https://github.com/NattyBagel/UofM-Engiqueers-Discord-Bot 'Open Github')`)
     
     let currPriority = 0
     let currCount = 0

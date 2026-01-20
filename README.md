@@ -12,6 +12,5 @@ Certain commands are equipped with presenting data which might be sensitive to c
 Once a command is used, only the user is aware of it.
 
 ## TODO
-- Dynamic Help Command
 - Full Bot Reload
 - Automatic Github Repo Downloading
