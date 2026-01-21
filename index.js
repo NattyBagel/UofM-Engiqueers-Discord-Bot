@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags, ActivityType} = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags} = require('discord.js');
 const { debug } = require('./config.json');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 //const { deployCommands } = require('./deploy-commands')
@@ -29,20 +29,16 @@ for (const folder of commandFolders) {
 }
 
 client.once(Events.ClientReady, c => {
-	console.log("Bot is on!")
+	console.log("UMEQ Bot is online!")
+
 	//Sets the Activity of the Bot
-	   client.user.setPresence({
-	   activities: [{ 
-		  name: `NattyBagel's Bot`, 
-		  type: ActivityType.Watching , 
-		  url: 'https://www.twitch.tv/nattybagel'}],
-	});
+	//client.user.setPresence("Use /help for a guide on all commands")
 	
 	if (debug){
-		console.log(`Number of Commands Loaded: ${client.commands.size}`);
+		console.log(`Number of Commands Loaded: ${client.commands.size}`)
 		//deployCommands()
 	}
-});
+})
 
 
 client.on(Events.InteractionCreate, async interaction => {
