@@ -1,3 +1,5 @@
+const fs  = require('fs')
+
 /**
  * Capitalizes the first letter of each word
  * 
@@ -48,9 +50,19 @@ function shortenLink(str){
     return str
 }
 
+function getJson(filePath){
+    try{
+        const data = fs.readFileSync(filePath,'utf-8')	
+        return JSON.parse(data)
+    }catch(e){
+        console.log(e)
+    }
+}
+
 module.exports = {
     capitalizeName,
     removeExtensions,
     convertToID,
-    shortenLink
-};
+    shortenLink,
+    getJson
+}
