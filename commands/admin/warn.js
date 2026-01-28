@@ -1,5 +1,6 @@
-const { SlashCommandBuilder, InteractionContextType, PermissionFlagsBits, ModalBuilder , StringSelectMenuBuilder , StringSelectMenuOptionBuilder , TextInputBuilder , TextInputStyle , TextDisplayBuilder , ActionRowBuilder} = require('discord.js');
-const { getJson } = require('../../functions/text')
+const { SlashCommandBuilder, InteractionContextType, PermissionFlagsBits, ModalBuilder , StringSelectMenuBuilder , StringSelectMenuOptionBuilder , TextInputBuilder , TextInputStyle , LabelBuilder , TextDisplayBuilder } = require('discord.js');
+const { getJson , capitalizeName } = require('../../functions/text')
+const { numWarnsBeforeBan } = require('../../config.json')
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -7,11 +8,14 @@ module.exports = {
 		.setDescription('Warns a user')
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .setContexts(InteractionContextType.Guild)
-        .addStringOption(option => 
-            option
+        .addUserOption(option => option
+            .setName('target')
+            .setRequired(true)
+            .setDescription('Give or take a Warning from...')
+        )
+        .addStringOption(option => option
             .setName('warntype')
             .setDescription("Whether to create or delete a warning")
-            .setRequired(true)
             .addChoices(
                 {name:"New",value:"new"},
                 {name:"Delete",value:"delete"}
@@ -36,10 +40,14 @@ module.exports = {
  *      Modal
  *          Select Menu - Select which warning to strike
  *      When a Warning is Deleted, Send a message in tickets that one has been deleted
+ * 
+ * SPECIAL CASES
+ * - Make sure Execs & admins arn't warned, so they can't ban each other
  */
 
 async function execute(interaction){
-    switch(interaction.options.getString('warntype')){
+    let warnType = interaction.options.getString('warntype') ?? 'new'
+    switch(warnType){
         case("new"):
             createWarning(interaction)
             break;
@@ -50,9 +58,7 @@ async function execute(interaction){
 }
 
 async function createWarning(interaction){
-    const modal = createWarningModal()
-    console.log(modal)
-    console.log("END MODAL -----------")
+    const modal = createWarningModal(interaction)
     await interaction.showModal(modal)
 }
 
@@ -63,38 +69,55 @@ async function deleteWarning(interaction){
 
 
 
-function createWarningModal(){
-    
+function createWarningModal(interaction){
+    let targetName = capitalizeName(interaction.options.getUser('target').username)
+
     let selectMenu = new StringSelectMenuBuilder()
     .setCustomId("rulenum")
-    .setPlaceholder("Pick a Rule")
-    
+    .setPlaceholder("Rule Violated...")
     let i = 1;
     getJson('archives/messages/rules.json').rules.forEach(rule => {
-        selectMenu.addOptions( new StringSelectMenuOptionBuilder()
-            .setLabel(`Rule ${i}`)
-            .setDescription(rule.substring(0,95)+"...")
-            .setValue(`${i}`)
-        )
+        let option = new StringSelectMenuOptionBuilder()
+        .setLabel(`Rule ${i}`)
+        .setValue(`${i}`)
+        if (rule.length > 96){
+            option.setDescription(rule.substring(0,95)+"...")
+        }else{
+            option.setDescription(rule)
+        }
+        selectMenu.addOptions(option)
         i++
     })
-    
+    let selectMenuLabel = new LabelBuilder()
+    .setLabel("Select Which Rule was Violated")
+    .setDescription("The user will be messaged on which rule they violated")
+    .setStringSelectMenuComponent(selectMenu)
 
     // Text Box for Extra information
     let textInput = new TextInputBuilder()
     .setCustomId("extrainfo")
-    .setPlaceholder("Extra information... (optional)")
+    .setPlaceholder(`${targetName} did...`)
     .setStyle(TextInputStyle.Paragraph)
-    .setLabel("Any Extra Important Information?")
+    .setRequired(false)
+    let textInputLabel = new LabelBuilder()
+    .setLabel("Extra Information")
+    .setDescription("A little bit of extra info, if you're wanting to be specific. (Optional)")
+    .setTextInputComponent(textInput)
 
-    let firstRow = new ActionRowBuilder().setComponents(selectMenu)
-    let secondRow = new ActionRowBuilder().setComponents(textInput)
+    let warningText = new TextDisplayBuilder()
+    if (0 < numWarnsBeforeBan){ // 0 is a temp value, gotta swap that with something tommorow
+        warningText.setContent(`${targetName} has ${numWarnsBeforeBan-0} Warnings Left.`)
+    }else{
+        warningText.setContent(`${targetName} will be Banned.`)
+    }
+
 
     // Building the actual modal
     let modal = new ModalBuilder()
     .setCustomId("createWarning")
     .setTitle("Create Warning")
-    .addComponents(firstRow,secondRow)
+    .addLabelComponents(selectMenuLabel,textInputLabel)
+    .addTextDisplayComponents(warningText)
 
     return modal
 }
