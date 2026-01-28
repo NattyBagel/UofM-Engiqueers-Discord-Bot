@@ -5,5 +5,7 @@
     "adminId": "841716339114377256",
 
     "defaultColor" : "#FF69B4",
-    "adminColor" : "#fc0339"
+    "adminColor" : "#fc0339",
+
+    "numWarnsBeforeBan" : 2
 }

@@ -29,7 +29,6 @@ for (const folder of commandFolders) {
 }
 
 
-const {EmbedBuilder} = require('discord.js')
 client.once(Events.ClientReady, c => {
 	console.log("UMEQ Bot is online!")
 
