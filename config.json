@@ -7,5 +7,12 @@
     "defaultColor" : "#FF69B4",
     "adminColor" : "#fc0339",
 
-    "numWarnsBeforeBan" : 2
+    "numWarnsBeforeBan" : 2,
+    "ticketChannelID" : "1465473085556785319",
+    "warningImmunityRoleIDs": [
+        "1436498841858998282",
+        "1436500286498803842",
+        "1436501573336567809",
+        "1463620563602767882"
+    ]
 }
