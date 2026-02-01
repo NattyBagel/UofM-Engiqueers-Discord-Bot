@@ -1,6 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags , ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js')
+const { EmbedBuilder, MessageFlags , ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js')
 const { version , defaultColor } = require('../../config.json')
 const { isAdmin } = require('../../functions/roles')
+const { CommandDataBuilder } = require('../../functions/CommandDataBuilder')
 
 const timeout = 180
 const maxCommandsPerPage = 8
@@ -15,12 +16,12 @@ function getPage(interaction,currPageNumber){
     // Add each command into a list sorted by priority
     interaction.client.commands.forEach(command => {
         // Ignore Commands that are admin, if user isnt admin
-        if (isAdmin(interaction) || command.help.priority != -1){
+        if (isAdmin(interaction) || command.data.getPriority() != -1){
             // If command priority doesn't exist in list, add it
-            if (!commandList.hasOwnProperty(command.help.priority)){
-                commandList[command.help.priority] = []
+            if (!commandList.hasOwnProperty(command.data.getPriority())){
+                commandList[command.data.getPriority()] = []
             }
-            commandList[command.help.priority].push(command)
+            commandList[command.data.getPriority()].push(command)
             commandNum++; // increase the number of commands
         }
     })
@@ -45,8 +46,8 @@ function getPage(interaction,currPageNumber){
             while(!complete && i < commandList[currPriority].length){
                 if(currCount >= maxCommandsPerPage * (currPageNumber - 1)){
                     Embed.addFields({
-                        name: `${commandList[currPriority][i].data.name}`, 
-                        value: `${commandList[currPriority][i].help.guideText}`,
+                        name: `${commandList[currPriority][i].data.getName()}`, 
+                        value: `${commandList[currPriority][i].data.getHelpText()}`,
                         inline: true
                     })
                     commandsAdded++
@@ -147,14 +148,11 @@ async function execute(interaction) {
 
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('help')
-		.setDescription('Information about Commands'),
-	execute,
-    help: {
-		guideText: 'Sends information about every command.',
-		// Priority of Commands (0 is highest for users, -1 is for Admins)
-		// If Matched Priority, sort alphabetically
-		priority: 0
-	}
+    data: new CommandDataBuilder()
+        .setName('help')
+        .setDescription('Information about Commands')
+        .setHelpText('Sends information about every command.')
+        .setPriority(0)
+        .setGlobalCommand(true),
+    execute,
 };

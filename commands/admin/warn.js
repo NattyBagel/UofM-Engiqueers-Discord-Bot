@@ -1,39 +1,37 @@
-const { SlashCommandBuilder, InteractionContextType, PermissionFlagsBits, ModalBuilder , StringSelectMenuBuilder 
-      , StringSelectMenuOptionBuilder , TextInputBuilder , TextInputStyle , LabelBuilder , TextDisplayBuilder 
-      , MessageFlags , EmbedBuilder} = require('discord.js');
+const { ModalBuilder , StringSelectMenuBuilder , StringSelectMenuOptionBuilder , TextInputBuilder , 
+        TextInputStyle , LabelBuilder , TextDisplayBuilder , MessageFlags , EmbedBuilder} = require('discord.js');
 const { capitalizeName } = require('../../functions/text')
 const { getJson , saveJson } = require('../../functions/files')
 const { modalCollector } = require('../../functions/collectors')
 const { numWarnsBeforeBan } = require('../../config.json')
 const { debug , ticketChannelID , warningImmunityRoleIDs } = require('../../config.json')
+const { CommandDataBuilder } = require('../../functions/CommandDataBuilder')
 
 const warningFilePath = 'archives/users/warnings.json'
 
-
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('warn')
-		.setDescription('Warns a user')
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-        .setContexts(InteractionContextType.Guild)
-        .addUserOption(option => option
-            .setName('target')
-            .setRequired(true)
-            .setDescription('Give or take a Warning from...')
+
+    data: new CommandDataBuilder()
+    .setName('warn')
+    .setDescription('Warns a user')
+    .setHelpText('Gives or Removes a Strike')
+    .setPriority(1)
+    .setAdminCommand()
+    .setGlobalCommand()
+    .addUserOption(option => option
+        .setName('target')
+        .setRequired(true)
+        .setDescription('Give or take a Warning from...')
+    )
+    .addStringOption(option => option
+        .setName('warntype')
+        .setDescription("Whether to create or delete a warning")
+        .addChoices(
+            {name:"New",value:"new"},
+            {name:"Delete",value:"delete"}
         )
-        .addStringOption(option => option
-            .setName('warntype')
-            .setDescription("Whether to create or delete a warning")
-            .addChoices(
-                {name:"New",value:"new"},
-                {name:"Delete",value:"delete"}
-            )
-        ),
-    execute,
-    help: {
-		guideText: 'Gives or Removes a Strike',
-		priority: -1
-	}
+    ),
+	execute
 };
 
 /**

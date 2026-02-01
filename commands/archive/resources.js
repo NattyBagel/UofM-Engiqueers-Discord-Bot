@@ -1,7 +1,8 @@
-const { SlashCommandBuilder , EmbedBuilder , MessageFlags } = require('discord.js');
+const { EmbedBuilder , MessageFlags } = require('discord.js');
 const fs = require('fs')
 const { removeExtensions, convertToID , shortenLink } = require('../../functions/text.js')
 const path = require('node:path')
+const { CommandDataBuilder } = require('../../functions/CommandDataBuilder.js')
 
 const resourcePath = 'archives/resources'
 /**
@@ -67,20 +68,25 @@ class ResourceGroup {
 }
 
 const allResourceGroups = Resource.load();
-var data = new SlashCommandBuilder()
-	.setName('resources')
-	.setDescription('Check Resources for a wide range of topics. All Private!')
-	.addStringOption(option => 
-		option
-		.setName('topic')
-		.setDescription("The topic to view")
-		.setRequired(true)
-	)
+
+var data = new CommandDataBuilder()
+.setName('resources')
+.setDescription('Check Resources for a wide range of topics. All Private!')
+.setHelpText( 'Shows resources on a wide variety of topics.')
+.setPriority(1)
+.setGlobalCommand()
+.addStringOption(option => 
+	option
+	.setName('topic')
+	.setDescription("The topic to view")
+	.setRequired(true)
+)
+
 Object.keys(allResourceGroups).forEach(key => { // Add a selector option for each resource group
 	let choice = {}
 	choice['name'] = allResourceGroups[key].name
 	choice['value'] = key
-	data.options[0].addChoices(choice)
+	data.getSlashCommandObject().options[0].addChoices(choice)
 })
 
 function findResourceGroup(interaction){
@@ -109,12 +115,6 @@ async function execute(interaction) {
 }
 
 module.exports = {
-	data: data,
-	execute,
-    help: {
-		guideText: 'Shows resources on a wide variety of topics.',
-		// Priority of Commands (0 is highest for users, -1 is for Admins)
-		// If Matched Priority, sort alphabetically
-		priority: 1
-	}
+	data,
+	execute
 };

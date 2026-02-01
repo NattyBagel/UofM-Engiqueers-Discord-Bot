@@ -1,82 +1,96 @@
-const { REST, Routes } = require('discord.js');
-const fs = require('node:fs');
-const path = require('node:path');
-const { debug , adminGuildId } = require('./config.json');
+const { REST, Routes } = require('discord.js')
+const fs = require('node:fs')
+const path = require('node:path')
+const { debug , devGuildID } = require('./config.json')
 
 module.exports = {
-    deployCommands
+    deployCommands,
+    getCommands
 }
 
-function deployCommands() {
-    var commands = [];
-    var adminCommands = [];
+async function deployCommands() {
+    let [ globalCommands, guildCommands ] = getCommands()
+
+    // Construct and prepare an instance of the REST module
+    const rest = new REST().setToken(process.env.TOKEN)
     
+    // deploy commands
+    
+    try {
+        if (debug){
+            console.log(`Started refreshing ${guildCommands.length + globalCommands.length} application commands.`)
+        }
+        // Refresh all Guild Commands
+        const guildData = await rest.put(
+            Routes.applicationGuildCommands(process.env.CLIEND_ID, devGuildID),
+            { body: arrayToCommandObject(guildCommands) },
+        )
+
+        // Refresh all Global Commands
+        const globalData = await rest.put(
+            Routes.applicationCommands(process.env.CLIEND_ID),
+            { body: arrayToCommandObject(globalCommands) },
+        )
+        
+        if (debug){
+            console.log(`Successfully reloaded ${globalData.length} global application commands.`)
+            console.log(`Successfully reloaded ${guildData.length} guild application commands.`)
+        }
+    } catch (error) {
+        console.error(error)
+    }
+
+
+    return [ globalCommands, guildCommands ]
+}
+
+function arrayToCommandObject(array){
+    return array.map(command => command.data.getSlashCommandObject().toJSON())
+}
+
+function getCommands(){
+    let globalCommands = [] 
+    let guildCommands = []
     // Grab all the command folders from the commands directory you created earlier
-    const foldersPath = path.join(__dirname, 'commands');
-    const commandFolders = fs.readdirSync(foldersPath);
+    const foldersPath = path.join(__dirname, 'commands')
+    const commandFolders = fs.readdirSync(foldersPath)
     
     for (const folder of commandFolders) {
         // Grab all the command files from the commands directory you created earlier
-        const commandsPath = path.join(foldersPath, folder);
-        const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+        const commandsPath = path.join(foldersPath, folder)
+        const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'))
+
         // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
-    
-        function readFromFolder(commandFiles){
-            const commands = [];
-            for (const file of commandFiles) {
-                const filePath = path.join(commandsPath, file);
-                const command = require(filePath);
-                if ('data' in command && 'execute' in command) {
-                    commands.push(command.data.toJSON());
-                } else {
-                    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        for (const file of commandFiles) {
+            const filePath = path.join(commandsPath, file)
+            const command = require(filePath)
+            if (command.data.isValidCommand() && 'execute' in command) {
+                if (command.data.isGlobalCommand()){
+                    // Is Global Command
+                    globalCommands.push(command)
+                }else{
+                    // Is Guild Command
+                    guildCommands.push(command)
+                }
+            } else { 
+                // Command Is invalid, so send a warning
+                let problems = command.data.getValidityProblems()
+                console.log(`[WARNING] The command at ${filePath} is missing the following properties:`)
+                if (problems.length == 0){
+                    console.log('\tExecute Property is Missing')
+                }else{
+                    console.log(`\t${problems}`)
                 }
             }
-            return commands;
         }
-    
-        if (folder != "admin"){
-            commands = commands.concat(readFromFolder(commandFiles));
-        }else{
-            adminCommands = adminCommands.concat(readFromFolder(commandFiles));
-        }
-    
     }
-
+    /*
     if (debug){
-        console.log(commands)
-        console.log(adminCommands)
+        console.log("-------------------------------------\nGLOBAL COMMANDS:")
+        console.log(globalCommands)
+        console.log("-------------------------------------\nGUILD COMMANDS:")
+        console.log(guildCommands)
     }
-
-    // Construct and prepare an instance of the REST module
-    const rest = new REST().setToken(process.env.TOKEN);
-    
-    // deploy commands
-    (async () => {
-        try {
-            if (debug){
-                console.log(`Started refreshing ${commands.length + adminCommands.length} application commands.`);
-            }
-            // Refresh all commands in the guild with the current set
-            const adminData = await rest.put(
-                Routes.applicationGuildCommands(process.env.CLIEND_ID, adminGuildId),
-                { body: adminCommands },
-            );
-    
-            // Refresh all commands in all guilds
-            const data = await rest.put(
-                Routes.applicationCommands(process.env.CLIEND_ID),
-                { body: commands },
-            );
-            
-            if (debug){
-                console.log(`Successfully reloaded ${data.length} application commands.`);
-                console.log(`Successfully reloaded ${adminData.length} admin application commands.`);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    })();
-
-    return [commands,adminCommands]
+    */
+    return [ globalCommands , guildCommands ]
 }

@@ -1,7 +1,7 @@
 {
     "version" : "0.3 BETA",
     "debug" : true,
-    "adminGuildId" : "836991410175344640",
+    "devGuildID" : "836991410175344640",
     "adminId": "841716339114377256",
 
     "defaultColor" : "#FF69B4",

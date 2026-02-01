@@ -1,6 +1,8 @@
-const { SlashCommandBuilder, InteractionContextType, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const { deployCommands } = require("../../deploy-commands.js");
 const { adminColor } = require("../../config.json");
+const { CommandDataBuilder } = require('../../functions/CommandDataBuilder')
+
 
 async function reimportCommands(interaction){
     const commandsLoaded = await deployCommands()
@@ -24,49 +26,45 @@ async function reDownloadCommands(interaction){
     interaction.reply({ content: 'not implemented yet', flags: MessageFlags.Ephemeral })
 }
 
-module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('reload')
-		.setDescription('(BOT ADMIN & DEV) Reloads Commands')
-        .addStringOption(option =>
-            option.setName('type')
-                .setDescription('What to Reload')
-                .setRequired(true)
-                .addChoices(
-                    { name: 'All', value: '0' },
-                    { name: 'Reimport Commands', value: '1' },
-                    { name: 'Restart Bot', value: '2' },
-                    { name: 'Download Files', value: '3'}
-                )
-        )		
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-        .setContexts(InteractionContextType.Guild),
-	async execute(interaction) {
+async function execute(interaction){
+    switch (interaction.options.getString('type')) {
+        case '0': // Reload Both Options
+            reimportCommands(interaction)
+            //restart(interaction)
+            //reDownloadCommands(interaction)
+            break;
+        case '1': // Reimport Commands from deploy-commands.js
+            reimportCommands(interaction)
+            break;
+        case '2': // reload index.js
+            restart(interaction)
+            break;
+        case '3': // Redownload
+            reDownloadCommands(interaction)
+            break;
+        default:
+            await interaction.reply({ content: "Error, Something went Wrong", flags: MessageFlags.Ephemeral })
+            break;
+    }
+}
 
-        switch (interaction.options.getString('type')) {
-            case '0': // Reload Both Options
-                reimportCommands(interaction)
-                //restart(interaction)
-                //reDownloadCommands(interaction)
-                break;
-            case '1': // Reimport Commands from deploy-commands.js
-                reimportCommands(interaction)
-                break;
-            case '2': // reload index.js
-                restart(interaction)
-                break;
-            case '3': // Redownload
-                reDownloadCommands(interaction)
-                break;
-            default:
-                await interaction.reply({ content: "Error, Something went Wrong", flags: MessageFlags.Ephemeral })
-                break;
-        }
-	},
-    help: {
-		guideText: 'Reloads key functions of the bot, such as the bot itself, commands and downloading from github',
-		// Priority of Commands (0 is highest for users, -1 is for Admins)
-		// If Matched Priority, sort alphabetically
-		priority: -1
-	}
+module.exports = {
+    data: new CommandDataBuilder()
+    .setName('reload')
+    .setDescription('(DEV) Reloads Commands')
+    .setHelpText('Reloads key functions of the bot, such as the bot itself, commands and downloading from github')
+    .setPriority(1)
+    .setAdminCommand()
+    .addStringOption(option =>
+        option.setName('type')
+            .setDescription('What to Reload')
+            .setRequired(true)
+            .addChoices(
+                { name: 'All', value: '0' },
+                { name: 'Guild Commands', value: '1' },
+                { name: 'Global Commands', value: '2' },
+                { name: 'Download Files', value: '3'}
+            )
+    ),
+	execute,
 };
