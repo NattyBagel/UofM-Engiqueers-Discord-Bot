@@ -1,8 +1,12 @@
 {
-    "version" : "0.3 BETA",
+    "version" : "0.4 BETA",
     "debug" : true,
     "devGuildID" : "836991410175344640",
-    "adminId": "841716339114377256",
+    "adminID": [
+        "841716339114377256",
+        "1436500286498803842",
+        "1436498841858998282"
+    ],
 
     "defaultColor" : "#FF69B4",
     "adminColor" : "#fc0339",

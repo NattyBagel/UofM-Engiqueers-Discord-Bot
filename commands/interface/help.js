@@ -1,5 +1,5 @@
 const { EmbedBuilder, MessageFlags , ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js')
-const { version , defaultColor } = require('../../config.json')
+const { version , defaultColor , devGuildID } = require('../../config.json')
 const { isAdmin } = require('../../functions/roles')
 const { CommandDataBuilder } = require('../../functions/CommandDataBuilder')
 
@@ -10,57 +10,86 @@ var maxPages = -1
 
 function getPage(interaction,currPageNumber){
 
-    let commandList = {} // List of All Available commands (unsorted)
-    let commandNum = 0
-    let commandsAdded = 0
-    // Add each command into a list sorted by priority
-    interaction.client.commands.forEach(command => {
-        // Ignore Commands that are admin, if user isnt admin
-        if (isAdmin(interaction) || command.data.getPriority() != -1){
-            // If command priority doesn't exist in list, add it
-            if (!commandList.hasOwnProperty(command.data.getPriority())){
-                commandList[command.data.getPriority()] = []
-            }
-            commandList[command.data.getPriority()].push(command)
-            commandNum++; // increase the number of commands
-        }
-    })
+    let commandByPriorities = sortCommandsByPriority(interaction)
     // Sets the max amount of pages
-    maxPages = Math.ceil(commandNum/maxCommandsPerPage)
+    maxPages = Math.ceil(Object.keys(interaction.client.commands).length/maxCommandsPerPage)
+
     // Builds the start of the Embed
     let Embed = new EmbedBuilder()
     .setColor(defaultColor)
     .setTitle(`UMEQ Command Help Guide (Page ${currPageNumber}/${maxPages})`)
     .setDescription(`Need Help with Commands? Here's some information! [(Bot v${version})](https://github.com/NattyBagel/UofM-Engiqueers-Discord-Bot 'Open Github')`)
-    
-    let currPriority = 0
+
     let currCount = 0
     let complete = false
-    if (isAdmin) currPriority = -1
-    // O(n) time, can be optimized but its good enough for now
-    while(!complete){
-        let i = 0
-        // Make sure Priority Exists
-        if (commandList.hasOwnProperty(currPriority)){
-            // Checks within the priority
-            while(!complete && i < commandList[currPriority].length){
-                if(currCount >= maxCommandsPerPage * (currPageNumber - 1)){
-                    Embed.addFields({
-                        name: `${commandList[currPriority][i].data.getName()}`, 
-                        value: `${commandList[currPriority][i].data.getHelpText()}`,
-                        inline: true
-                    })
-                    commandsAdded++
-                }
-                if (commandsAdded >= Math.min(maxCommandsPerPage,commandNum) || currCount >= commandNum) complete = true
-                i++
-                currCount++
+
+    let i = 0
+    let keys = Object.keys(commandByPriorities).sort()
+    while(!complete && i < keys.length){
+        let k = 0
+        let adminCommandNum = 0
+        let currCommands = commandByPriorities[keys[i]]
+        while(!complete
+            && currCount + currCommands.length >= maxCommandsPerPage * (currPageNumber-1) // Count LowerBound
+            && currCount < maxCommandsPerPage * currPageNumber // Count UpperBound
+            && k < currCommands.length
+        ){ 
+            if (currCount + k - adminCommandNum >= maxCommandsPerPage * (currPageNumber-1)){
+                adminCommandNum += attemptToAddCommand(Embed,currCommands[k],interaction)
+            }
+            k++
+            // Commands have been added
+            if (currCount + k - adminCommandNum >= maxCommandsPerPage * currPageNumber){
+                complete = true
             }
         }
-        currPriority++
+        // Add Length of the Priority to the count
+        currCount += commandByPriorities[keys[i]].length
+        i++
     }
 
     return Embed
+}
+
+/**
+ * Attempts to Add the command to the help embed. However, a few checks must be passed
+ * @param Embed The help Embed
+ * @param command The Command To Add
+ * @param interaction the interaction
+ * @return 1 if the command was rejected
+ */
+function attemptToAddCommand(Embed,command,interaction){
+    if (!command.data.isGlobalCommand() && !(interaction.guild.id == devGuildID)){
+        // Locked in Dev Guild
+        return 1
+    }
+    if (command.data.isAdminCommand() && !isAdmin(interaction)){
+        // Command is locked by admins
+        return 1
+    }
+    Embed.addFields({
+        name: `${command.data.getName()}`, 
+        value: `${command.data.getHelpText()}`,
+        inline: true
+    })
+    return 0
+}
+
+function sortCommandsByPriority(interaction){
+    let commandsByPriorities = {} // List of All Available commands (unsorted)
+    // Add each command into a list sorted by priority
+    Object.keys(interaction.client.commands).sort().forEach(key => {
+        let priority = interaction.client.commands[key].data.getPriority()
+        // Ignore Commands that are admin, if user isnt admin
+        if (isAdmin(interaction) || priority != -1){
+            // If command priority doesn't exist in list, add it
+            if (!commandsByPriorities.hasOwnProperty(priority)){
+                commandsByPriorities[priority] = []
+            }
+            commandsByPriorities[priority].push(interaction.client.commands[key])
+        }
+    })
+    return commandsByPriorities
 }
 
 

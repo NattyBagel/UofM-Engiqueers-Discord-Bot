@@ -1,4 +1,4 @@
-const { adminId } = require('../config.json')
+const { adminID } = require('../config.json')
 
 
 /**
@@ -12,7 +12,7 @@ function isAdmin(interaction){
     var isAdmin = false
     // Find if the user has an admin role
     member.roles.cache.map(role => {
-        if (role.id == adminId) {
+        if (adminID.includes(role.id)){
             isAdmin = true
             return
         }
