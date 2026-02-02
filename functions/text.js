@@ -1,4 +1,3 @@
-const fs  = require('fs')
 
 /**
  * Capitalizes the first letter of each word
@@ -6,9 +5,9 @@ const fs  = require('fs')
  * @param str uncapitalized string
  * @return capitalized string
  */
-function capitalizeName(str){
+function capitalizeName(str) {
     var REGEX = /(\b[a-z](?!\s))/g
-    return str.replace(REGEX, function(x){
+    return str.replace(REGEX, function (x) {
         return x.toUpperCase()
     })
 }
@@ -19,8 +18,8 @@ function capitalizeName(str){
  * @param str string to remove the extension
  * @return string without the extension
  */
-function removeExtensions(str){
-    return str.substring(0,str.indexOf(".",-1))
+function removeExtensions(str) {
+    return str.substring(0, str.indexOf(".", -1))
 }
 
 /**
@@ -28,28 +27,27 @@ function removeExtensions(str){
  * @param str string to covert
  * @return converted string
  */
-function convertToID(str){
-    return str.replaceAll(" ","_").toLowerCase()
+function convertToID(str) {
+    return str.replaceAll(" ", "_").toLowerCase()
 }
 
 /**
  * Shortens the link of a URL to remove the https://
  */
-function shortenLink(str){
-    if(str.toLowerCase().startsWith("https://")){
-        str = str.replace("https://","")
-    }else if (str.toLowerCase().startsWith("http://")){
-        str = str.replace("http://","")
+function shortenLink(str) {
+    if (str.toLowerCase().startsWith("https://")) {
+        str = str.replace("https://", "")
+    } else if (str.toLowerCase().startsWith("http://")) {
+        str = str.replace("http://", "")
     }
-    if(str.startsWith("www")){
-        str = str.replace("www","")
+    if (str.startsWith("www")) {
+        str = str.replace("www", "")
     }
-    if(str.includes("/")){
-        str = str.substring(0,str.indexOf('/'))
+    if (str.includes("/")) {
+        str = str.substring(0, str.indexOf('/'))
     }
     return str
 }
-
 
 module.exports = {
     capitalizeName,

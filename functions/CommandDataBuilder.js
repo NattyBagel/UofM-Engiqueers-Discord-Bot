@@ -1,12 +1,12 @@
-const { SlashCommandBuilder , PermissionFlagsBits , InteractionContextType } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits, InteractionContextType } = require('discord.js')
 
 
 /**
  * Holds and manages data about commands
  */
 class CommandDataBuilder {
-    
-    constructor(){
+
+    constructor() {
         this.name = null
         this.description = null
         this.slashCommand = new SlashCommandBuilder() // Slash command Object
@@ -16,7 +16,7 @@ class CommandDataBuilder {
         this.globalCommand = false // Command is for All or Specific Servers
     }
 
-    toString(){
+    toString() {
         return "lol"
     }
 
@@ -24,7 +24,7 @@ class CommandDataBuilder {
      * Checks if the command is Valid
      * @return true if valid
      */
-    isValidCommand(){
+    isValidCommand() {
         return this.getValidityProblems().length == 0
     }
 
@@ -32,7 +32,7 @@ class CommandDataBuilder {
      * Gets a String Representation of all the problems with the command
      * @return A list of Problems
      */
-    getValidityProblems(){
+    getValidityProblems() {
         let problems = []
         if (this.name == null) problems.push(' Name is Missing')
         if (this.description == null) problems.push(' Description is Missing')
@@ -44,7 +44,7 @@ class CommandDataBuilder {
      * Sets the Name of the Command
      * @param name the name of the command
      */
-    setName(name){
+    setName(name) {
         this.name = name
         this.slashCommand.setName(name)
         return this
@@ -54,7 +54,7 @@ class CommandDataBuilder {
      * Sets the Name of the Command
      * @return the name of the command
      */
-    getName(){
+    getName() {
         return this.name
     }
 
@@ -62,7 +62,7 @@ class CommandDataBuilder {
      * Sets the Description of the Command
      * @param description the desctiption of the command
      */
-    setDescription(description){
+    setDescription(description) {
         this.description = description
         this.slashCommand.setDescription(description)
         return this
@@ -72,7 +72,7 @@ class CommandDataBuilder {
      * Gets the Slash Command Object
      * @return the Slash Command Object (SlashCommandBuilder())
      */
-    getSlashCommandObject(){
+    getSlashCommandObject() {
         return this.slashCommand
     }
 
@@ -80,7 +80,7 @@ class CommandDataBuilder {
      * Sets the /help text of the Command
      * @param text the /help text of the command
      */
-    setHelpText(text){
+    setHelpText(text) {
         this.helpText = text
         return this
     }
@@ -89,7 +89,7 @@ class CommandDataBuilder {
      * Gets the /help text of the command
      * @returns the /help text of the command
      */
-    getHelpText(){
+    getHelpText() {
         return this.helpText
     }
 
@@ -97,7 +97,7 @@ class CommandDataBuilder {
      * Sets the Priority of the command
      * @param priorityNum the priority of the command
      */
-    setPriority(priorityNum){
+    setPriority(priorityNum) {
         this.priority = priorityNum
         return this
     }
@@ -106,14 +106,14 @@ class CommandDataBuilder {
      * Gets the Priority of the Command
      * @returns the priority of the command
      */
-    getPriority(){
+    getPriority() {
         return this.priority
     }
 
     /**
      * Sets the command to Admins only
      */
-    setAdminCommand(){
+    setAdminCommand() {
         this.admin = true
         this.slashCommand
             .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
@@ -124,14 +124,14 @@ class CommandDataBuilder {
     /**
      * Get the Command to be for Admins Only
      */
-    isAdminCommand(){
+    isAdminCommand() {
         return this.admin
-    }  
+    }
 
     /**
      * Sets the command to be in all servers
      */
-    setGlobalCommand(){
+    setGlobalCommand() {
         this.globalCommand = true
         return this
     }
@@ -139,15 +139,15 @@ class CommandDataBuilder {
     /**
      * Is this command enabled in all servers
      */
-    isGlobalCommand(){
+    isGlobalCommand() {
         return this.globalCommand
     }
-    
-    addStringOption(options){
+
+    addStringOption(options) {
         this.slashCommand.addStringOption(options)
         return this
     }
-    addUserOption(options){
+    addUserOption(options) {
         this.slashCommand.addUserOption(options)
         return this
     }

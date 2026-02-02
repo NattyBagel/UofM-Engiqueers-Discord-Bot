@@ -1,6 +1,6 @@
-const { EmbedBuilder , MessageFlags } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs')
-const { removeExtensions, convertToID , shortenLink } = require('../../functions/text.js')
+const { removeExtensions, convertToID, shortenLink } = require('../../functions/text.js')
 const path = require('node:path')
 const { CommandDataBuilder } = require('../../functions/CommandDataBuilder.js')
 
@@ -10,7 +10,7 @@ const resourcePath = 'archives/resources'
  */
 class Resource {
 
-	constructor(resource){
+	constructor(resource) {
 		this.name = resource.name
 		this.link = resource.link
 		this.description = resource.description
@@ -21,36 +21,36 @@ class Resource {
 	 * @param dirPath path of the folder containing the resources
 	 * @return all resources
 	 */
-	static load(){
+	static load() {
 		let allResourceGroups = {}
 		// Go through each file in the folder
-		try{
+		try {
 			fs.readdirSync(resourcePath).filter(file => file.endsWith('.json')).forEach(fileName => {
 				// Parse the info in the file
-				const data = fs.readFileSync(path.join('.',resourcePath,fileName),'utf-8')	
+				const data = fs.readFileSync(path.join('.', resourcePath, fileName), 'utf-8')
 				JSON.parse(data).forEach(resource => {
 					// Check for new key for each resource group
 					let key = convertToID(removeExtensions(fileName))
-					if (!(key in allResourceGroups)){
+					if (!(key in allResourceGroups)) {
 						// Create a new Resource group, to contain the smaller resources
-						allResourceGroups[key] = new ResourceGroup(removeExtensions(fileName),resource.maindescription,resource.colour)
-					}else{
+						allResourceGroups[key] = new ResourceGroup(removeExtensions(fileName), resource.maindescription, resource.colour)
+					} else {
 						// Add Resource into its designated resource group
 						allResourceGroups[key].push(new Resource(resource))
-					}					
-				})			
+					}
+				})
 			})
-		}catch(error){
+		} catch (error) {
 			console.log(error)
 		}
-		
+
 		return allResourceGroups
 	}
 }
 
 class ResourceGroup {
-	
-	constructor(name,description,colour){
+
+	constructor(name, description, colour) {
 		this.name = name
 		this.description = description
 		this.resources = []
@@ -59,10 +59,9 @@ class ResourceGroup {
 
 	/**
 	 * Adds a resource to the resource group
-	 * 
 	 * @param resource the resource to add to the group
 	 */
-	push(resource){
+	push(resource) {
 		this.resources.push(resource)
 	}
 }
@@ -70,17 +69,17 @@ class ResourceGroup {
 const allResourceGroups = Resource.load();
 
 var data = new CommandDataBuilder()
-.setName('resources')
-.setDescription('Check Resources for a wide range of topics. All Private!')
-.setHelpText( 'Shows resources on a wide variety of topics.')
-.setPriority(1)
-.setGlobalCommand()
-.addStringOption(option => 
-	option
-	.setName('topic')
-	.setDescription("The topic to view")
-	.setRequired(true)
-)
+	.setName('resources')
+	.setDescription('Check Resources for a wide range of topics. All Private!')
+	.setHelpText('Shows resources on a wide variety of topics.')
+	.setPriority(1)
+	.setGlobalCommand()
+	.addStringOption(option =>
+		option
+			.setName('topic')
+			.setDescription("The topic to view")
+			.setRequired(true)
+	)
 
 Object.keys(allResourceGroups).forEach(key => { // Add a selector option for each resource group
 	let choice = {}
@@ -89,17 +88,17 @@ Object.keys(allResourceGroups).forEach(key => { // Add a selector option for eac
 	data.getSlashCommandObject().options[0].addChoices(choice)
 })
 
-function findResourceGroup(interaction){
+function findResourceGroup(interaction) {
 	return allResourceGroups[interaction.options.getString('topic')]
 }
 
 async function execute(interaction) {
 	const resourceGroup = findResourceGroup(interaction)
-	if (resourceGroup != null){
+	if (resourceGroup != null) {
 		let Embed = new EmbedBuilder()
-		.setTitle(resourceGroup.name)
-		.setDescription(resourceGroup.description)
-		.setColor(resourceGroup.colour)
+			.setTitle(resourceGroup.name)
+			.setDescription(resourceGroup.description)
+			.setColor(resourceGroup.colour)
 		resourceGroup.resources.forEach(resource => {
 			let field = {}
 			field['name'] = resource.name
@@ -108,10 +107,10 @@ async function execute(interaction) {
 			Embed.addFields(field)
 		})
 		await interaction.reply({ embeds: [Embed], flags: MessageFlags.Ephemeral })
-	}else{
+	} else {
 		await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral })
 	}
-	
+
 }
 
 module.exports = {
